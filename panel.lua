@@ -1,5 +1,6 @@
 if RBXL_RUNNING_SCRIPT or _G.RBXL_RUNNING_SCRIPT then return end
 
+
 if getgenv then
 	getgenv().DISABLE_RAYFIELD_REQUESTS = true
 end
@@ -115,7 +116,7 @@ end
 
 local UserTab = Window:CreateTab("Hub", "info")
 UserTab:CreateSection("Details")
-UserTab:CreateLabel("Version: 3.2.8", "history")
+UserTab:CreateLabel("Version: 0.0.6 Private", "history")
 UserTab:CreateLabel("Role: Developer", "circle-user-round")
 
 UserTab:CreateDivider()
@@ -167,14 +168,45 @@ UserTab:CreateButton({
 	Callback = ChangeTheme("Serenity")
 })
 
-local SettingsTab = Window:CreateTab("Main", "scroll-text")
-SettingsTab:CreateSection("Hubs")
-SettingsTab:CreateSection("Games")
-SettingsTab:CreateSection("Misc")
+local MainTab = Window:CreateTab("Main", "scroll-text")
+MainTab:CreateSection("Hubs")
+
+MainTab:CreateButton({
+    Name = "Sirius",
+    Callback = function()
+        loadstring(game:HttpGet('https://sirius.menu/script'))()
+    end
+})
+
+MainTab:CreateButton({
+    Name = "Orca",
+    Callback = function()
+        loadstring(
+  game:HttpGetAsync("https://raw.githubusercontent.com/richie0866/orca/master/public/snapshot.lua")
+)()
+    end
+})
+
+
+
+MainTab:CreateSection("Games")
+MainTab:CreateSection("Misc")
 
 
 
 local SettingsTab = Window:CreateTab("Settings", "settings")
+
+SettingsTab:CreateSection("Settings")
+
+SettingsTab:CreateButton({
+    Name = "Self Destruct",
+    Callback = function()
+        Rayfield:Destroy()
+    end
+})
+
+
+SettingsTab:CreateSection("Info")
 
 SettingsTab:CreateLabel("Executor: " .. (identifyexecutor and identifyexecutor() or getexecutorname and getexecutorname() or "******"), "app-window")
 SettingsTab:CreateLabel("HWID: " .. RbxAnalyticsService:GetClientId(), "binary")
