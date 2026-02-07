@@ -19,7 +19,7 @@ local Player = Players.LocalPlayer
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-	Name = "webshares panel",
+	Name = "webshares portal",
 	Icon = 105769028533132,
 	LoadingTitle = "webshares panel",
 	LoadingSubtitle = "by webshares and bilsr",
@@ -184,6 +184,20 @@ MainTab:CreateButton({
         loadstring(
   game:HttpGetAsync("https://raw.githubusercontent.com/richie0866/orca/master/public/snapshot.lua")
 )()
+    end
+})
+
+MainTab:CreateButton({
+    Name = "Wisl",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Bilsurrr/bilsr-hub-rayfield/0c5f3f8ac68b668473e1e64b9e269b62626bb34a/skiubiditoi%20wertlsdfsdgsd"))()
+    end
+})
+
+MainTab:CreateButton({
+    Name = "MoonUI",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/IlikeyocutgHAH/MoonUI-v13-102-SCRIPTS/main/MoonUI%20v13!"))()
     end
 })
 
