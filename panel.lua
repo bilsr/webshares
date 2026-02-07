@@ -89,68 +89,6 @@ local function CopyToClipboard(content)
 	return false
 end
 
-local FlagNames = {'Flag', 'AceFlag', 'BiFlag', 'DemiFlag', 'GayFlag', 'LesbianFlag', 'PanFlag', 'TransFlag'}
-
-local function GetFlags(character)
-	local Flags = {}; do
-		if character then
-			for i,v in pairs(character:GetChildren()) do
-				if v:IsA("Tool") and FindInTable(FlagNames, v.Name) then
-					table.insert(Flags, v)
-				end
-			end
-		end
-	end
-	return Flags
-end
-
-local function GetFlag(character, specific)
-	local Flag; do
-		if character then
-			for i,v in pairs(character:GetChildren()) do
-				if v:IsA("Tool") and FindInTable(FlagNames, v.Name) then
-					if typeof(specific) == "string" then
-						if v.Name:lower() == specific:lower() then
-							Flag = v;
-							break
-						end
-					else
-						Flag = v;
-						break
-					end
-				end
-			end
-		end
-	end
-	return Flag
-end
-
-local function GetDecalsFromFlag(flag)
-	if flag then
-		local Decals = {}
-		for i,v in pairs(flag:GetDescendants())do
-			if v:IsA("Decal") or v:IsA("Texture") or v:IsA("Trail") then
-				table.insert(Decals, v)
-			end
-		end
-		return Decals
-	end
-end
-
-local function ChangeDecal(decal, assetId)
-	local Object = {["\70\108\97\103"]={["\67\117\115\116\111\109\70\108\97\103\76\101\102\116"]=decal,["\67\117\115\116\111\109\70\108\97\103\82\105\103\104\116"]=decal}}
-	Remotes.ChangeFlagImage:FireServer(Object, assetId)
-end
-
-local function ChangeFlag(player, assetId, specific)
-	local Flag = GetFlag(player.Character, specific)
-	if Flag then
-		for i, decal in pairs(GetDecalsFromFlag(Flag)) do
-			ChangeDecal(decal, assetId)
-		end
-	end
-end
-
 local function MoveCharacter(vector3)
 	if Player.Character then
 		Player.Character:MoveTo(vector3)
