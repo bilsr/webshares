@@ -167,7 +167,7 @@ UserTab:CreateButton({
 	Callback = ChangeTheme("Serenity")
 })
 
-local SettingsTab = Window:CreateTab("More", "scroll-text")
+local SettingsTab = Window:CreateTab("Main", "scroll-text")
 SettingsTab:CreateSection("Hubs")
 SettingsTab:CreateSection("Games")
 SettingsTab:CreateSection("Misc")
