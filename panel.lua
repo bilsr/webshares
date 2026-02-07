@@ -18,10 +18,10 @@ local Player = Players.LocalPlayer
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-	Name = "webshares panel | beta 0.0.1",
+	Name = "webshares panel",
 	Icon = 105769028533132,
-	LoadingTitle = "loading",
-	LoadingSubtitle = "made by webshares and  bilsr",
+	LoadingTitle = "webshares panel",
+	LoadingSubtitle = "by webshares and bilsr",
 	Theme = "Default",
 	DisableRayfieldPrompts = true,
 	DisableBuildWarnings = true,
@@ -166,6 +166,12 @@ UserTab:CreateButton({
 	Name = "Serenity Theme",
 	Callback = ChangeTheme("Serenity")
 })
+
+local SettingsTab = Window:CreateTab("More", "scroll-text")
+SettingsTab:CreateSection("Hubs")
+SettingsTab:CreateSection("Games")
+SettingsTab:CreateSection("Misc")
+
 
 
 local SettingsTab = Window:CreateTab("Settings", "settings")
