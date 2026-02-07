@@ -19,9 +19,9 @@ local Player = Players.LocalPlayer
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-	Name = "webshares portal",
+	Name = "webshares gateway",
 	Icon = 105769028533132,
-	LoadingTitle = "webshares panel",
+	LoadingTitle = "webshares gateway",
 	LoadingSubtitle = "by webshares and bilsr",
 	Theme = "Default",
 	DisableRayfieldPrompts = true,
