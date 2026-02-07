@@ -190,7 +190,16 @@ MainTab:CreateButton({
 
 
 MainTab:CreateSection("Games")
+
 MainTab:CreateSection("Misc")
+MainTab:CreateButton({
+    Name = "Decal Logger",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Image-Logger-29606"))()
+    end
+})
+
+
 
 
 
