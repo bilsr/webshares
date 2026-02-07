@@ -270,6 +270,10 @@ SettingsTab:CreateLabel(
     "shield"
 )
 
-
+task.spawn(function()
+	while task.wait(5) do
+		Rayfield:SaveConfiguration()
+	end
+end)
 
 Rayfield:LoadConfiguration()
