@@ -195,6 +195,13 @@ MainTab:CreateButton({
 })
 
 MainTab:CreateButton({
+    Name = "AkAdmin",
+    Callback = function()
+		loadstring(game:HttpGet("https://absent.wtf/AKADMIN.lua"))()
+    end
+})
+
+MainTab:CreateButton({
     Name = "MoonUI",
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/IlikeyocutgHAH/MoonUI-v13-102-SCRIPTS/main/MoonUI%20v13!"))()
