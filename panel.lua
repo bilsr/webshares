@@ -216,7 +216,7 @@ MainTab:CreateButton({
 })
 
 MainTab:CreateButton({
-    Name = "SystemBroken",
+    Name = "MoonHub",
     Callback = function()
         loadstring(game:HttpGet("https://moon-hub.pages.dev/api/universal"))()
     end
