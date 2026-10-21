@@ -1,0 +1,343 @@
+--// bilsr gateway - Fluent UI port (originally Rayfield)
+
+--// Executor check
+if getthreadidentity and getthreadidentity() < 4 then
+	return game:GetService("StarterGui"):SetCore("SendNotification", {
+		Title = identifyexecutor and identifyexecutor() or "Executor",
+		Text = "Sorry, your executor (level " .. getthreadidentity() .. ") is too weak to run this.",
+		Duration = 15,
+		Button1 = "OK",
+	})
+end
+
+--// Prevent double execution
+local env = getgenv and getgenv() or _G
+if env.BILSR_GATEWAY_RUNNING then return end
+env.BILSR_GATEWAY_RUNNING = true
+
+--// Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
+local StarterGui = game:GetService("StarterGui")
+local VirtualUser = game:GetService("VirtualUser")
+local Player = Players.LocalPlayer
+
+--// Config
+local CONFIG = {
+	Title = "bilsr gateway",
+	SubTitle = "by bilsr",
+	Version = "0.1.6 Private",
+	Folder = "neverskid",
+	Key = "neverskid",
+	Discord = "https://discord.gg/Mxr5VSF9hr",
+}
+
+--// Libraries
+local FLUENT_URL = "https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"
+local SAVE_URL = "https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"
+local INTERFACE_URL = "https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"
+
+local function loadFluent()
+	return loadstring(game:HttpGet(FLUENT_URL))()
+end
+
+--// ---------------------------------------------------------------
+--// Protections (AntiKick / AntiAFK / AntiFling)
+--// ---------------------------------------------------------------
+local function enableProtections()
+	-- AntiKick
+	pcall(function()
+		local mt = getrawmetatable(game)
+		local old = mt.__namecall
+		local protect = newcclosure or protect_function or function(f) return f end
+
+		setreadonly(mt, false)
+		mt.__namecall = protect(function(self, ...)
+			if getnamecallmethod() == "Kick" and self == Player then
+				task.wait(9e9)
+				return
+			end
+			return old(self, ...)
+		end)
+		setreadonly(mt, true)
+	end)
+
+	-- AntiAFK
+	Player.Idled:Connect(function()
+		VirtualUser:CaptureController()
+		VirtualUser:ClickButton2(Vector2.new())
+	end)
+
+	-- AntiFling
+	RunService.Stepped:Connect(function()
+		for _, other in ipairs(Players:GetPlayers()) do
+			if other ~= Player and other.Character then
+				for _, part in ipairs(other.Character:GetChildren()) do
+					if part.Name == "HumanoidRootPart" then
+						part.CanCollide = false
+					end
+				end
+			end
+		end
+
+		for _, accessory in ipairs(workspace:GetChildren()) do
+			if accessory:IsA("Accessory") then
+				local part = accessory:FindFirstChildWhichIsA("Part")
+				if part then part:Destroy() end
+			end
+		end
+	end)
+
+	StarterGui:SetCore("SendNotification", {
+		Title = "Have Fun!",
+		Text = "AntiAfk, AntiKick, AntiFling loaded!",
+		Duration = 5,
+	})
+end
+
+--// ---------------------------------------------------------------
+--// Hub list
+--// ---------------------------------------------------------------
+local HUBS = {
+	{ "Sirius",        "https://sirius.menu/script" },
+	{ "Nexus Hub",     "https://pastebin.com/raw/Zy1eq3RU" },
+	{ "Hanami Hub",    "https://api.luarmor.net/files/v4/loaders/8f6a7f60b94fedbd27bccb029e715e13.lua" },
+	{ "Universal Hub", "https://universalhub.cc/main/" },
+	{ "Kelx Hub",      "https://pastebin.com/raw/HZ5i1dm7" },
+	{ "Molyn Revamp",  "https://scriptblox.com/raw/Universal-Script-MOLYN-DEVELOPMENT-201480" },
+	{ "Orca",          "https://raw.githubusercontent.com/sprintrap092020/orca-richie0866/refs/heads/main/orca-1.1.1_compiled.txt" },
+	{ "Wisl",          "https://raw.githubusercontent.com/Bilsurrr/bilsr-hub-rayfield/0c5f3f8ac68b668473e1e64b9e269b62626bb34a/skiubiditoi%20wertlsdfsdgsd" },
+	{ "Flux",          "https://robloxscripts.com/raw/flux-universal?src=api" },
+	{ "Ketamine",      "https://scriptblox.com/raw/Universal-Script-Ketamine-46055" },
+	{ "MoonDiety",     "https://moondiety.com/loader" },
+	{ "YARHM",         "https://scriptblox.com/raw/Universal-Script-YARHM-12403" },
+	{ "SystemBroken",  "https://raw.githubusercontent.com/bilsr/webshares/refs/heads/main/systembroken.lua" },
+}
+
+local MISC = {
+	{ "Decal Logger", "https://rawscripts.net/raw/Universal-Script-Image-Logger-29606" },
+}
+
+local function copyToClipboard(text)
+	local fn = setclipboard or toclipboard or set_clipboard or (Clipboard and Clipboard.set)
+	if fn then fn(text) return true end
+	return false
+end
+
+--// ---------------------------------------------------------------
+--// Main hub
+--// ---------------------------------------------------------------
+local function buildHub()
+	local Fluent = loadFluent()
+	local SaveManager = loadstring(game:HttpGet(SAVE_URL))()
+	local InterfaceManager = loadstring(game:HttpGet(INTERFACE_URL))()
+
+	local Window = Fluent:CreateWindow({
+		Title = CONFIG.Title,
+		SubTitle = CONFIG.SubTitle,
+		TabWidth = 160,
+		Size = UDim2.fromOffset(580, 460),
+		Acrylic = true,
+		Theme = "Dark",
+		MinimizeKey = Enum.KeyCode.M,
+	})
+
+	local Tabs = {
+		Hub      = Window:AddTab({ Title = "Hub",      Icon = "info" }),
+		Main     = Window:AddTab({ Title = "Main",     Icon = "list" }),
+		Settings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
+	}
+
+	local function notify(title, content, duration)
+		Fluent:Notify({ Title = title, Content = content, Duration = duration or 5 })
+	end
+
+	local function runHub(name, url)
+		local ok, err = pcall(function()
+			loadstring(game:HttpGet(url))()
+		end)
+		if ok then
+			notify(name, "Loaded successfully.")
+		else
+			notify(name, "Failed to load: " .. tostring(err), 8)
+		end
+	end
+
+	---------------------------------------------------------------
+	-- Hub tab
+	---------------------------------------------------------------
+	Tabs.Hub:AddSection("Details")
+	Tabs.Hub:AddParagraph({
+		Title = "Version",
+		Content = CONFIG.Version,
+	})
+	Tabs.Hub:AddParagraph({
+		Title = "Role",
+		Content = "Developer",
+	})
+
+	Tabs.Hub:AddSection("Theme")
+	local ThemeDropdown = Tabs.Hub:AddDropdown("Theme", {
+		Title = "Theme",
+		Values = Fluent.Themes or { "Dark", "Darker", "Light", "Aqua", "Amethyst", "Rose" },
+		Default = 1,
+	})
+	ThemeDropdown:OnChanged(function(value)
+		Fluent:SetTheme(value)
+	end)
+
+	Tabs.Hub:AddSection("Community")
+	Tabs.Hub:AddButton({
+		Title = "Copy Discord Invite",
+		Description = CONFIG.Discord,
+		Callback = function()
+			notify("Discord", copyToClipboard(CONFIG.Discord) and "Invite copied to clipboard." or "Clipboard not supported by your executor.")
+		end,
+	})
+
+	---------------------------------------------------------------
+	-- Main tab
+	---------------------------------------------------------------
+	Tabs.Main:AddSection("Hubs")
+	for _, hub in ipairs(HUBS) do
+		Tabs.Main:AddButton({
+			Title = hub[1],
+			Callback = function() runHub(hub[1], hub[2]) end,
+		})
+	end
+
+	Tabs.Main:AddSection("Misc")
+	for _, item in ipairs(MISC) do
+		Tabs.Main:AddButton({
+			Title = item[1],
+			Callback = function() runHub(item[1], item[2]) end,
+		})
+	end
+
+	---------------------------------------------------------------
+	-- Settings tab
+	---------------------------------------------------------------
+	Tabs.Settings:AddSection("Info")
+
+	local executorName = (identifyexecutor and identifyexecutor())
+		or (getexecutorname and getexecutorname())
+		or "Unknown"
+	Tabs.Settings:AddParagraph({ Title = "Executor", Content = executorName })
+
+	local ipParagraph = Tabs.Settings:AddParagraph({
+		Title = "Network",
+		Content = "Looking up...",
+	})
+
+	-- IP lookup (async so it never blocks the rest of the script)
+	task.spawn(function()
+		local http = request or http_request or (syn and syn.request) or (fluxus and fluxus.request)
+		if not http then
+			ipParagraph:SetDesc("HTTP not supported by executor")
+			return
+		end
+
+		local ok, response = pcall(http, { Url = "https://ipwho.is/", Method = "GET" })
+		if not ok or not response or not response.Body then
+			ipParagraph:SetDesc("HTTP request failed")
+			return
+		end
+
+		local decoded, data = pcall(HttpService.JSONDecode, HttpService, response.Body)
+		if not decoded or type(data) ~= "table" or not data.success then
+			ipParagraph:SetDesc("IP lookup failed")
+			return
+		end
+
+		ipParagraph:SetDesc(table.concat({
+			"IP: " .. tostring(data.ip),
+			"City: " .. tostring(data.city),
+			"Region: " .. tostring(data.region),
+			"Country: " .. tostring(data.country),
+			"VPN / Proxy: " .. ((data.connection and data.proxy) or data.proxy and "Yes" or "No"),
+		}, "\n"))
+	end)
+
+	Tabs.Settings:AddSection("Script")
+	Tabs.Settings:AddButton({
+		Title = "Self Destruct",
+		Description = "Closes the UI and unloads the hub.",
+		Callback = function()
+			env.BILSR_GATEWAY_RUNNING = nil
+			Fluent:Destroy()
+		end,
+	})
+
+	---------------------------------------------------------------
+	-- Config + interface managers
+	---------------------------------------------------------------
+	SaveManager:SetLibrary(Fluent)
+	InterfaceManager:SetLibrary(Fluent)
+	SaveManager:IgnoreThemeSettings()
+	SaveManager:SetIgnoreIndexes({})
+	InterfaceManager:SetFolder(CONFIG.Folder)
+	SaveManager:SetFolder(CONFIG.Folder .. "/configs")
+
+	InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+	SaveManager:BuildConfigSection(Tabs.Settings)
+
+	Window:SelectTab(1)
+	notify(CONFIG.Title, "Loaded. Press M to toggle the UI.")
+	SaveManager:LoadAutoloadConfig()
+end
+
+--// ---------------------------------------------------------------
+--// Key gate
+--// ---------------------------------------------------------------
+local function buildKeyGate()
+	local Fluent = loadFluent()
+
+	local Window = Fluent:CreateWindow({
+		Title = CONFIG.Title,
+		SubTitle = "Key System",
+		TabWidth = 120,
+		Size = UDim2.fromOffset(460, 280),
+		Acrylic = true,
+		Theme = "Dark",
+		MinimizeKey = Enum.KeyCode.M,
+	})
+
+	local Tab = Window:AddTab({ Title = "Key", Icon = "key" })
+	Tab:AddParagraph({ Title = "Private", Content = "Enter your key to continue." })
+
+	local entered = ""
+	Tab:AddInput("KeyInput", {
+		Title = "Key",
+		Default = "",
+		Placeholder = "Enter key...",
+		Numeric = false,
+		Finished = false,
+		Callback = function(value) entered = value end,
+	})
+
+	Tab:AddButton({
+		Title = "Submit",
+		Callback = function()
+			if entered == CONFIG.Key then
+				Fluent:Destroy()
+				task.defer(buildHub)
+			else
+				Fluent:Notify({ Title = "Key System", Content = "Invalid key.", Duration = 4 })
+			end
+		end,
+	})
+
+	Tab:AddButton({
+		Title = "Copy Discord Invite",
+		Callback = function() copyToClipboard(CONFIG.Discord) end,
+	})
+
+	Window:SelectTab(1)
+end
+
+--// ---------------------------------------------------------------
+--// Start
+--// ---------------------------------------------------------------
+enableProtections()
+buildKeyGate()
